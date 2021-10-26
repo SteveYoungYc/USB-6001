@@ -12,17 +12,20 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 
 class Ui_MainWindow(object):
-    def __init__(self):
-        super().__init__()
-
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(800, 600)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.lcdNumber = QtWidgets.QLCDNumber(self.centralwidget)
-        self.lcdNumber.setGeometry(QtCore.QRect(200, 80, 271, 161))
+        self.lcdNumber.setGeometry(QtCore.QRect(630, 20, 111, 41))
         self.lcdNumber.setObjectName("lcdNumber")
+        self.verticalLayoutWidget = QtWidgets.QWidget(self.centralwidget)
+        self.verticalLayoutWidget.setGeometry(QtCore.QRect(140, 110, 531, 331))
+        self.verticalLayoutWidget.setObjectName("verticalLayoutWidget")
+        self.graph_layout = QtWidgets.QVBoxLayout(self.verticalLayoutWidget)
+        self.graph_layout.setContentsMargins(0, 0, 0, 0)
+        self.graph_layout.setObjectName("graph_layout")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 800, 26))
@@ -38,6 +41,3 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
-
-    def changeNum(self, string):
-        self.lcdNumber.display(string)

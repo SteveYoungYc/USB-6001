@@ -1,43 +1,60 @@
-#!/usr/bin/python3
-# -*- coding: utf-8 -*-
-
-"""
-Py40 PyQt5 tutorial
-
-This example shows a tooltip on
-a window and a button.
-
-author: Jan Bodnar
-website: py40.com
-last edited: January 2015
-"""
-
 import sys
+
+import numpy as np
+from PyQt5 import QtWidgets
 from PyQt5.QtWidgets import (QWidget, QToolTip,
                              QPushButton, QApplication, QMainWindow)
 from PyQt5.QtGui import QFont
 
+from Chart import Demo
+import pyqtgraph as pg
 from Communication import USB
-from out import Ui_MainWindow
+from MainWindow import Ui_MainWindow
 
 
-class FirstMainWin(QMainWindow):
-    def __init__(self):  # self代表实例本身
-        super(FirstMainWin, self).__init__()  # 调用父类初始化方法
-        #设置主窗口的标题
-        self.setWindowTitle("第一个窗口应用")
-        #设置窗口的尺寸
-        self.resize(400,300)
+class MyGraphWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    def __init__(self):
+        super(MyGraphWindow, self).__init__()
+        self.setupUi(self)  # 初始化窗口
+        self.p1, self.p2 = self.set_graph_ui()  # 设置绘图窗口
+
+    def set_graph_ui(self):
+        pg.setConfigOptions(antialias=True)  # pg全局变量设置函数，antialias=True开启曲线抗锯齿
+
+        win = pg.GraphicsLayoutWidget()  # 创建pg layout，可实现数据界面布局自动管理
+
+        # pg绘图窗口可以作为一个widget添加到GUI中的graph_layout，当然也可以添加到Qt其他所有的容器中
+        self.graph_layout.addWidget(win)
+
+        p1 = win.addPlot(title="sin 函数")  # 添加第一个绘图窗口
+        p1.setLabel('left', text='meg', color='#ffffff')  # y轴设置函数
+        p1.showGrid(x=True, y=True)  # 栅格设置函数
+        p1.setLogMode(x=False, y=False)  # False代表线性坐标轴，True代表对数坐标轴
+        p1.setLabel('bottom', text='time', units='s')  # x轴设置函数
+        # p1.addLegend()  # 可选择是否添加legend
+
+        win.nextRow()  # layout换行，采用垂直排列，不添加此行则默认水平排列
+        p2 = win.addPlot(title="cos 函数")
+        p2.setLabel('left', text='meg', color='#ffffff')
+        p2.showGrid(x=True, y=True)
+        p2.setLogMode(x=False, y=False)
+        p2.setLabel('bottom', text='time', units='s')
+        # p2.addLegend()
+
+        return p1, p2
+
+    def plot_sin_cos(self):
+        t = np.linspace(0, 20, 200)
+        y_sin = np.sin(t)
+        y_cos = np.cos(t)
+        self.p1.plot(t, y_sin, pen='g', name='sin(x)', clear=True)
+        self.p2.plot(t, y_cos, pen='g', name='con(x)', clear=True)
 
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    MainWindow = QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-
-    usb = USB()
-    usb.read()
-    ui.changeNum(usb.dataStr)
-    MainWindow.show()
+    window = Ui_MainWindow()
+    myWin = MyGraphWindow()
+    myWin.plot_sin_cos()
+    myWin.show()
     sys.exit(app.exec_())
