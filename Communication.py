@@ -11,6 +11,9 @@ class USB(object):
         super().__init__()
         self.data = 0
         self.dataStr = ""
+        self.output = 1
+        self.x = 0
+        self.y = 0
 
     def read(self):
         with nidaqmx.Task() as task:
@@ -21,6 +24,17 @@ class USB(object):
             pp.pprint(self.data)
             self.data = round(self.data, 2)
             self.dataStr = str(self.data)
+
+            data = task.read(number_of_samples_per_channel=10)
+            self.x = np.arange(0, len(data))
+            self.y = data
+
+    def write(self, writeData):
+        with nidaqmx.Task() as task:
+            task.ao_channels.add_ao_voltage_chan("Dev1/ao0")
+            task.write(writeData)
+
+
 """
             data = task.read(number_of_samples_per_channel=1)
             pp.pprint(data)
@@ -41,4 +55,3 @@ class USB(object):
             data = task.read(number_of_samples_per_channel=2)
             pp.pprint(data)
 """
-

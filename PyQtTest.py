@@ -10,6 +10,8 @@ from Chart import Demo
 import pyqtgraph as pg
 from Communication import USB
 from MainWindow import Ui_MainWindow
+from queue import Queue
+import time
 
 
 class MyGraphWindow(QtWidgets.QMainWindow, Ui_MainWindow):
@@ -17,6 +19,8 @@ class MyGraphWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         super(MyGraphWindow, self).__init__()
         self.setupUi(self)  # 初始化窗口
         self.p1, self.p2 = self.set_graph_ui()  # 设置绘图窗口
+
+        self.data1 = np.random.normal(size=300)
 
     def set_graph_ui(self):
         pg.setConfigOptions(antialias=True)  # pg全局变量设置函数，antialias=True开启曲线抗锯齿
@@ -26,7 +30,7 @@ class MyGraphWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # pg绘图窗口可以作为一个widget添加到GUI中的graph_layout，当然也可以添加到Qt其他所有的容器中
         self.graph_layout.addWidget(win)
 
-        p1 = win.addPlot(title="sin 函数")  # 添加第一个绘图窗口
+        p1 = win.addPlot(title="Voltage")  # 添加第一个绘图窗口
         p1.setLabel('left', text='meg', color='#ffffff')  # y轴设置函数
         p1.showGrid(x=True, y=True)  # 栅格设置函数
         p1.setLogMode(x=False, y=False)  # False代表线性坐标轴，True代表对数坐标轴
@@ -50,11 +54,25 @@ class MyGraphWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.p1.plot(t, y_sin, pen='g', name='sin(x)', clear=True)
         self.p2.plot(t, y_cos, pen='g', name='con(x)', clear=True)
 
+    def plot(self, x, y):
+        self.p1.plot(x, y, pen='g', name='sin(x)', clear=True)
+
+    def plot_test(self):
+        x = np.arange(0, 10)
+        y = np.arange(0, 10)
+        self.p1.plot(x, y, pen='g', name='sin(x)', clear=True)
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     window = Ui_MainWindow()
     myWin = MyGraphWindow()
-    myWin.plot_sin_cos()
+    # myWin.plot_sin_cos()
+
+    usb = USB()
+    usb.write(3.3)
+    usb.read()
+    myWin.plot(usb.x, usb.y)
+    myWin.lcdNumber.display(usb.dataStr)
     myWin.show()
     sys.exit(app.exec_())
