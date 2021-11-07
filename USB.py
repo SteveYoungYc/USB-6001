@@ -19,10 +19,10 @@ class USB(object):
         with nidaqmx.Task() as task:
             task.ai_channels.add_ai_voltage_chan("Dev1/ai0")
 
-            print('1 Channel 1 Sample Read: ')
+            # print('1 Channel 1 Sample Read: ')
             self.data = task.read()
-            pp.pprint(self.data)
-            self.data = round(self.data, 2)
+            # pp.pprint(self.data)
+            self.data = round(self.data, 4)
             self.dataStr = str(self.data)
 
             data = task.read(number_of_samples_per_channel=10)
