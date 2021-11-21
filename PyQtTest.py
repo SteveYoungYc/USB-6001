@@ -66,8 +66,12 @@ class MyGraphWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
 
 if __name__ == '__main__':
-    app = QApplication(sys.argv)
-    window = Ui_MainWindow()
-    myWin = MyGraphWindow()
-    myWin.show()
-    sys.exit(app.exec_())
+    # app = QApplication(sys.argv)
+    # window = Ui_MainWindow()
+    # myWin = MyGraphWindow()
+    # myWin.show()
+    # sys.exit(app.exec_())
+    usb = USB()
+    usb.write(2.5)
+    usb.sample2()
+
