@@ -33,6 +33,7 @@ class USB(object):
         with nidaqmx.Task() as task:
             task.ao_channels.add_ao_voltage_chan("Dev1/ao0")
             task.write(writeData)
+            # task.timing.cfg_samp_clk_timing()
 
 
 """

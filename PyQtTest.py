@@ -60,7 +60,7 @@ class MyGraphWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.curve1.setData(self.data1)
 
     def usb_update(self):
-        self.usb.write(3.3)
+        self.usb.write(2.5)
         self.usb.read()
         # self.plot(self.usb.x, self.usb.y)
 
