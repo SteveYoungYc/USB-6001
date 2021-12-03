@@ -19,6 +19,13 @@ class USB(object):
         self.y = 0
         self.sampleRate = 10000
         self.sampleTime = 2
+        self.task = nidaqmx.Task()
+        self.samples = []
+        self.task.ai_channels.add_ai_voltage_chan("Dev1/ai0")
+        self.task.timing.cfg_samp_clk_timing(
+            rate=self.sampleRate,
+            sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS,
+            samps_per_chan=self.sampleRate * self.sampleTime)
 
     def read(self):
         with nidaqmx.Task() as task:
@@ -41,66 +48,29 @@ class USB(object):
             # task.timing.cfg_samp_clk_timing()
 
     def sample(self):
-        with nidaqmx.Task() as task:
-            task.ai_channels.add_ai_voltage_chan("Dev1/ai0")
-            task.timing.cfg_samp_clk_timing(self.sampleRate, sample_mode=constants.AcquisitionType.CONTINUOUS,
-                                            samps_per_chan=(self.sampleRate * self.sampleTime))
+        loaded_task = nidaqmx.Task()
 
-            samples_per_buffer = int(self.sampleRate // 30)  # 30 hz update
-            reader = stream_readers.AnalogMultiChannelReader(task.in_stream)
-            writer = stream_writers.AnalogMultiChannelWriter(task.out_stream)
+        sent_samples = []  # list for saving acquired data
 
-            def reading_task_callback(task_idx, event_type, num_samples, callback_data=None):
-                num_channels = 1
-                print(num_samples)
-                buffer = np.zeros(num_samples, dtype=np.float32)
-                reader.read_many_sample(buffer, num_samples, timeout=constants.WAIT_INFINITELY)
-                print(buffer)
+        loaded_task.ai_channels.add_ai_voltage_chan("Dev1/ai0")
+        loaded_task.timing.cfg_samp_clk_timing(
+            rate=self.sampleRate,
+            sample_mode=nidaqmx.constants.AcquisitionType.CONTINUOUS,
+            samps_per_chan=self.sampleRate * self.sampleTime)
 
-                # Convert the data from channel as a row order to channel as a column
-                data = buffer.T.astype(self.dtype)
-                print(data)
+        def callback(task_handle, every_n_samples_event_type,
+                     number_of_samples, callback_data):
+            """
+            Callback function/
+            """
+            print('Every N Samples callback invoked.')
 
-            task.register_every_n_samples_acquired_into_buffer_event(samples_per_buffer, reading_task_callback)
+            samples = loaded_task.read(number_of_samples_per_channel=2560)
+            sent_samples.extend(samples)
+            print(samples)
+            return 0
 
-    def sample2(self):
-        with nidaqmx.Task() as task:
-            task.ai_channels.add_ai_voltage_chan("Dev1/ai0")
-            task.timing.cfg_samp_clk_timing(self.sampleRate, sample_mode=constants.AcquisitionType.CONTINUOUS,
-                                            samps_per_chan=(self.sampleRate * self.sampleTime))
-            sent_samples = []
+        loaded_task.register_every_n_samples_acquired_into_buffer_event(200, callback)
 
-            def callback(task_handle, every_n_samples_event_type,
-                         number_of_samples, callback_data):
-                """
-                Callback function/
-                """
-                print('Every N Samples callback invoked.')
+        loaded_task.start()
 
-                samples = task.read(number_of_samples_per_channel=200)
-                sent_samples.extend(samples)
-
-                return 0
-            task.register_every_n_samples_acquired_into_buffer_event(200, callback)
-            task.start()
-
-"""
-            data = task.read(number_of_samples_per_channel=1)
-            pp.pprint(data)
-
-            print('1 Channel N Samples Read: ')
-            data = task.read(number_of_samples_per_channel=10)
-            x = np.arange(0, len(data))
-            pp.pprint(data)
-            plt.plot(x, data)
-
-            task.ai_channels.add_ai_voltage_chan("Dev1/ai1")
-
-            print('N Channel 1 Sample Read: ')
-            data = task.read()
-            pp.pprint(data)
-
-            print('N Channel N Samples Read: ')
-            data = task.read(number_of_samples_per_channel=2)
-            pp.pprint(data)
-"""

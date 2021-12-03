@@ -28,8 +28,6 @@ class MyGraphWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # 定时器间隔50ms，可以理解为 50ms 刷新一次数据
         self.timer.start(100)
 
-        self.usb = USB()
-
     def set_graph_ui(self):
         pg.setConfigOptions(antialias=True)  # pg全局变量设置函数，antialias=True开启曲线抗锯齿
 
@@ -51,27 +49,21 @@ class MyGraphWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.p2.plot(x, y, pen='g', name='sin(x)', clear=True)
 
     def update_data(self):
-        self.usb_update()
         self.data1[:-1] = self.data1[1:]
-        self.data1[-1] = self.usb.data
+        self.data1[-1] = 1
         self.originPos += 1
         self.curve1.setPos(self.originPos, 0)
         # 数据填充到绘制曲线中
         self.curve1.setData(self.data1)
 
-    def usb_update(self):
-        self.usb.write(2.5)
-        self.usb.read()
-        # self.plot(self.usb.x, self.usb.y)
-
-
-if __name__ == '__main__':
-    # app = QApplication(sys.argv)
-    # window = Ui_MainWindow()
-    # myWin = MyGraphWindow()
-    # myWin.show()
-    # sys.exit(app.exec_())
-    usb = USB()
-    usb.write(2.5)
-    usb.sample2()
+#
+# if __name__ == '__main__':
+#     # app = QApplication(sys.argv)
+#     # window = Ui_MainWindow()
+#     # myWin = MyGraphWindow()
+#     # myWin.show()
+#     # sys.exit(app.exec_())
+#     usb = USB()
+#     usb.write(2.5)
+#     usb.sample()
 
